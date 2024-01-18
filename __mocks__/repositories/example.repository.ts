@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Example } from '../../src/entities/example'
+import { Example } from '../../src/Contexts/ContextExample/Example/domain/Example'
 import { IExampleRepository } from '../../src/repositories/example.repository'
 
 export class FakeExampleRepository implements IExampleRepository {

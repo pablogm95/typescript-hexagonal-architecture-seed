@@ -1,11 +1,13 @@
 ######################
 # BASE CONFIGURATION #
 ######################
-FROM node:14-alpine AS base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
 ENV PATH=/app/node_modules/.bin:$PATH
+
+EXPOSE 8080
 
 COPY package*.json ./
 
@@ -13,15 +15,27 @@ RUN npm install
 
 COPY . /app
 
-RUN npm run test && \
-  npm run test:unit && \
-  npm run compile
+
+#############################
+# DEVELOPMENT CONFIGURATION #
+#############################
+FROM base AS development
+
+ENV NODE_ENV=development
+
+
+######################
+# BUILD CONFIGURATION #
+######################
+FROM base AS build
+
+RUN npm run compile
 
 
 ############################
 # PRODUCTION CONFIGURATION #
 ############################
-FROM node:14-alpine AS production
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
@@ -33,19 +47,7 @@ COPY package*.json ./
 
 RUN npm install --only=production
 
-# Copy the dist build
-COPY --from=base /app/dist /app/dist
+# Copy the source build
+COPY --from=build /app/dist /app/dist
 
 USER node
-
-CMD ["npm", "start"]
-
-
-#############################
-# DEVELOPMENT CONFIGURATION #
-#############################
-FROM base AS development
-
-ENV NODE_ENV=development
-
-CMD ["npm", "run", "dev"]
